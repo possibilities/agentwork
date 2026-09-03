@@ -1,6 +1,6 @@
 import { ApiClient } from "agentmux/client";
 import type { AgentsChanged, EventFrame } from "agentmux/protocol";
-import type { Theme } from "./ramp.ts";
+import { fxnkRamp, type Theme } from "./ramp.ts";
 import { TrayList, type TrayRow } from "./tray-list.ts";
 
 /**
@@ -32,13 +32,35 @@ export async function runTray(options: { apiSocket: string; theme: Theme }): Pro
   });
   renderer.root.add(list.root);
 
+  // fmx's empty state, and the Screen's: one dim line, centred, until the
+  // first Agent. An empty list would read as nothing at all.
+  const empty = new core.BoxRenderable(renderer, {
+    id: "tray-empty",
+    width: "100%",
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    visible: false,
+  });
+  const emptyText = new core.TextRenderable(renderer, {
+    id: "tray-empty-text",
+    content: "no agents",
+    fg: fxnkRamp(theme).dim,
+    selectable: false,
+  });
+  empty.add(emptyText);
+  renderer.root.add(empty);
+
   const paint = () => {
     const rows: TrayRow[] = agents.agents.map((agent) => ({
       name: agent.name,
       status: agent.status,
       active: agent.name === agents.shown,
     }));
+    list.root.visible = rows.length > 0;
+    empty.visible = rows.length === 0;
     list.render(rows, renderer.width);
+    renderer.requestRender();
   };
 
   const onEvent = (event: EventFrame) => {
@@ -48,6 +70,7 @@ export async function runTray(options: { apiSocket: string; theme: Theme }): Pro
     } else if (event.event === "theme.changed") {
       theme = event.data.theme;
       list.applyTheme(theme);
+      emptyText.fg = fxnkRamp(theme).dim;
       paint();
     } else if (event.event === "instance.stopping") {
       finish(0);
@@ -65,6 +88,7 @@ export async function runTray(options: { apiSocket: string; theme: Theme }): Pro
     if (status.theme !== theme) {
       theme = status.theme;
       list.applyTheme(theme);
+      emptyText.fg = fxnkRamp(theme).dim;
     }
     paint();
   } catch (error) {
