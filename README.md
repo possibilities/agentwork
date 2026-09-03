@@ -8,47 +8,45 @@ checkout in its config; there is no agentwork command.
 
 ```
 ~/code/agentwork/scripts/install.sh           # bun install; nothing goes on PATH
-cp config.example ~/.config/agentmux/instances/default
+cp config.example.yaml ~/.config/agentmux/instances/default.yaml
 agentmux check                                # what the config sets, or what is wrong
 agentmux start --attach
 ```
 
 The config is agentmux's, one file per instance:
 
-```
-setup = ~/code/agentwork
-prefix = ctrl+space
+```yaml
+setup: ~/code/agentwork
+prefix: ctrl+space
 
-[panel left]
-command = tray
-description = The agent list
-needs-agents = true
-visible = true
-width = 26
-
-[panel drawer]
-command = agentmux screen --text drawer
-visible = false
-height = 8
-
-[panel dock]
-command = agentmux screen --text dock
-visible = false
-width = 40
-
-[panel right]
-command = agentmux screen --text right
-visible = false
-width = 40
+panels:
+  left:
+    command: tray
+    description: The agent list
+    needs-agents: true
+    visible: true
+    width: 26
+  drawer:
+    command: agentmux screen --text drawer
+    visible: false
+    height: 8
+  dock:
+    command: agentmux screen --text dock
+    visible: false
+    width: 40
+  right:
+    command: agentmux screen --text right
+    visible: false
+    width: 40
 ```
 
 `setup` puts this checkout's `bin/` first on every panel app's PATH and
-makes it their working directory, so `command = tray` under `[panel left]`
+makes it their working directory, so `command: tray` under `panels.left`
 is `bin/tray` here. The panels are the left panel, the left drawer under it, the dock panel
 between the left panel and the agents panel, and the right panel. Any program that speaks
 agentmux's socket can take a panel's `command` instead;
 `agentmux screen --text LINE` is agentmux's placeholder as a program.
-`visible` in a panel section and the sizes seed the first start only; the instance
+`visible` in a panel entry and the sizes seed the first start only; the instance
 remembers them after. The
 panel apps find `AGENTMUX_INSTANCE`, `AGENTMUX_SOCKET`, `AGENTMUX_MCP_URL`,
 `AGENTMUX_MCP_TOKEN` and `AGENTMUX_THEME` in their environment. agentmux's

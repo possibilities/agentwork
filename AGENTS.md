@@ -2,7 +2,7 @@
 
 A reference agentmux Setup: `bin/tray`, the agent list, for the left panel.
 An agentmux instance uses it by saying `setup = ~/code/agentwork`
-and `command = tray` under `[panel left]` in its config; agentmux (`~/code/agentmux`) is the
+and `command: tray` under `panels.left` in its config; agentmux (`~/code/agentmux`) is the
 multiplexer, the API, the CLI, the config grammar and the placeholder
 Screen. agentwork ships programs, never the operator's config.
 
@@ -23,7 +23,7 @@ Screen. agentwork ships programs, never the operator's config.
 
 ```
 bin/tray              the left panel app's entry: reads AGENTMUX_SOCKET and AGENTMUX_THEME
-config.example        an instance config using this setup, to copy
+config.example.yaml   an instance config using this setup, to copy
 src/tui/tray.ts       the left panel app: mirrors agent.list and each state change, a row press is agent.show
 src/tui/agent-state.ts  the model: fmx's five display states from agentmux's four, and what the human has seen
 src/tui/tray-list.ts  the row painter
