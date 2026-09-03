@@ -45,6 +45,12 @@ describe("the config names a command for each part", () => {
     );
     expect(config).toEqual(DEFAULT_CONFIG);
     expect(() => parseConfig("viewport = vim")).toThrow(ConfigError);
+    expect(() => parseConfig("prefx = ctrl+a")).toThrow(/unknown key "prefx"/);
+    // Inside agentmux's namespaces, agentmux's parser judges, here and now.
+    expect(() => parseConfig("tray = x\nharness.claude.colour = red")).toThrow(
+      /line 2: unknown harness field/,
+    );
+    expect(() => parseConfig("prefix = hyper+b")).toThrow(/line 1: .*modifier/);
     expect(() => parseConfig("instance = work")).toThrow(/file's name is the instance/);
     expect(() => parseConfig("tray")).toThrow(/line 1/);
   });

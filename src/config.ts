@@ -1,5 +1,9 @@
 import { homedir } from "node:os";
 import { join } from "node:path";
+import {
+  ConfigError as AgentmuxConfigError,
+  parseConfig as parseAgentmuxConfig,
+} from "agentmux/config";
 
 /**
  * `~/.config/agentwork/instances/<name>`: one file per agentmux Instance,
@@ -66,6 +70,16 @@ function isAgentmuxKey(key: string): boolean {
 }
 
 export function parseConfig(text: string, base: Config = DEFAULT_CONFIG): Config {
+  // agentmux's keys are passed through unread, but not unchecked: a bad
+  // harness field or prefix chord fails here, at apply, not at the next start.
+  try {
+    parseAgentmuxConfig(text);
+  } catch (error) {
+    if (error instanceof AgentmuxConfigError) {
+      throw new ConfigError(`line ${error.line}: ${error.message}`);
+    }
+    throw error;
+  }
   const config: Config = { parts: { ...base.parts }, visible: { ...base.visible } };
   const lines = text.split("\n");
   for (let index = 0; index < lines.length; index += 1) {
