@@ -57,7 +57,7 @@ function parseArgs(argv: string[]): Flags {
   return flags;
 }
 
-type Status = { running: boolean; socket: string };
+type Status = { running: boolean; socket: string; configFile: string | null };
 
 /** agentmux's own view of the instance; `agentmux status` exits 1 while it is down. */
 async function instanceStatus(instance: string): Promise<Status> {
@@ -67,7 +67,12 @@ async function instanceStatus(instance: string): Promise<Status> {
   });
   const text = await new Response(proc.stdout).text();
   await proc.exited;
-  let parsed: { running?: boolean; socket?: string; sockets?: { api?: string } };
+  let parsed: {
+    running?: boolean;
+    socket?: string;
+    sockets?: { api?: string };
+    config?: { file?: string | null };
+  };
   try {
     parsed = JSON.parse(text);
   } catch {
@@ -75,7 +80,24 @@ async function instanceStatus(instance: string): Promise<Status> {
   }
   const socket = parsed.sockets?.api ?? parsed.socket;
   if (!socket) throw new Error("agentmux status names no socket");
-  return { running: parsed.running !== false && parsed.sockets !== undefined, socket };
+  return {
+    running: parsed.running !== false && parsed.sockets !== undefined,
+    socket,
+    configFile: parsed.config?.file ?? null,
+  };
+}
+
+/**
+ * An Instance started by a bare `agentmux start` runs on agentmux's built-in
+ * prefix and harnesses, and only a restart can change that; the parts still
+ * apply. Say so rather than let the human wonder why the prefix is wrong.
+ */
+function warnIfStartedElsewhere(instance: string, status: Status, configPath: string): void {
+  if (!status.running || status.configFile === configPath) return;
+  const from = status.configFile ? `with ${status.configFile}` : "without a config";
+  process.stderr.write(
+    `agentwork: instance "${instance}" was started ${from}, not ${configPath}; its prefix and harnesses stay agentmux's until you stop it and run agentwork start\n`,
+  );
 }
 
 async function agentmux(args: string[]): Promise<number> {
@@ -142,6 +164,7 @@ async function main(argv: string[]): Promise<number> {
         if (code !== 0) return code;
         status = await instanceStatus(instance);
       }
+      warnIfStartedElsewhere(instance, status, configPath);
       if (flags.attach) return attach(instance, config, status.socket);
       await apply(status.socket, config);
       return 0;
@@ -152,6 +175,7 @@ async function main(argv: string[]): Promise<number> {
         process.stderr.write(`instance "${instance}" is not running\n`);
         return 1;
       }
+      warnIfStartedElsewhere(instance, status, configPath);
       return attach(instance, config, status.socket);
     }
     case "apply": {
@@ -160,6 +184,7 @@ async function main(argv: string[]): Promise<number> {
         process.stderr.write(`instance "${instance}" is not running\n`);
         return 1;
       }
+      warnIfStartedElsewhere(instance, status, configPath);
       await apply(status.socket, config);
       return 0;
     }

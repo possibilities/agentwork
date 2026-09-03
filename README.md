@@ -51,7 +51,10 @@ harness.claude.default-model = opus-1m
 agentwork passes those through without reading them, and agentmux ignores
 agentwork's. agentmux reads its keys at start only, so a change to them
 needs a stop and start; the part lines apply on every `apply`, `start` or
-`attach`.
+`attach`. Start instances with `agentwork start`, not `agentmux start`: a
+bare agentmux start knows no config file and runs on agentmux's built-in
+prefix and harnesses. agentwork warns when it meets such an instance; the
+parts still apply, and a stop and `agentwork start` fixes the rest.
 
 A part's value is a command line, split on whitespace, run in that part's
 pane. It finds `AGENTMUX_INSTANCE`, `AGENTMUX_SOCKET`, `AGENTMUX_MCP_URL`,
