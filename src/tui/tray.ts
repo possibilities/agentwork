@@ -1,7 +1,8 @@
 import { ApiClient } from "agentmux/client";
-import type { AgentsChanged, EventFrame } from "agentmux/protocol";
+import type { EventFrame } from "agentmux/protocol";
+import { TrayModel } from "./agent-state.ts";
 import { fxnkRamp, type Theme } from "./ramp.ts";
-import { TrayList, type TrayRow } from "./tray-list.ts";
+import { TrayList } from "./tray-list.ts";
 
 /**
  * The Tray process: lives in the left pane, never takes focus, never reads a
@@ -25,7 +26,7 @@ export async function runTray(options: { apiSocket: string; theme: Theme }): Pro
   let theme = options.theme;
   renderer.setBackgroundColor(core.RGBA.defaultBackground());
 
-  let agents: AgentsChanged = { agents: [], shown: null };
+  const model = new TrayModel();
   const { promise: done, resolve: finish } = Promise.withResolvers<number>();
 
   let client: ApiClient | null = null;
@@ -54,11 +55,7 @@ export async function runTray(options: { apiSocket: string; theme: Theme }): Pro
   renderer.root.add(empty);
 
   const paint = () => {
-    const rows: TrayRow[] = agents.agents.map((agent) => ({
-      name: agent.name,
-      status: agent.status,
-      active: agent.name === agents.shown,
-    }));
+    const rows = model.rows();
     list.root.visible = rows.length > 0;
     empty.visible = rows.length === 0;
     list.render(rows, renderer.width);
@@ -67,7 +64,11 @@ export async function runTray(options: { apiSocket: string; theme: Theme }): Pro
 
   const onEvent = (event: EventFrame) => {
     if (event.event === "agents.changed") {
-      agents = event.data;
+      model.replace(event.data);
+      paint();
+    } else if (event.event === "agent.state.changed") {
+      // One Agent moved; the list is as it was. Seen or not is the model's.
+      model.stateChanged(event.data);
       paint();
     } else if (event.event === "theme.changed") {
       theme = event.data.theme;
@@ -86,7 +87,7 @@ export async function runTray(options: { apiSocket: string; theme: Theme }): Pro
     });
     await client.request("events.subscribe");
     const status = await client.request("instance.status");
-    agents = { agents: status.agents, shown: status.shown };
+    model.replace({ agents: status.agents, shown: status.shown });
     if (status.theme !== theme) {
       theme = status.theme;
       list.applyTheme(theme);

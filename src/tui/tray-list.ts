@@ -1,12 +1,13 @@
 import {
   BoxRenderable,
+  bold,
   type CliRenderer,
   fg,
   StyledText,
   type TextChunk,
   TextRenderable,
 } from "@opentui/core";
-import type { AgentStatus } from "agentmux/protocol";
+import type { DisplayState, TrayRow } from "./agent-state.ts";
 import { fxnkRamp, type Ramp, type Theme } from "./ramp.ts";
 
 /**
@@ -16,35 +17,49 @@ import { fxnkRamp, type Ramp, type Theme } from "./ramp.ts";
  * only the active row filled, selection on mouse-down, rows reused across
  * renders because OpenTUI's handle table is never reclaimed.
  */
-export type TrayRow = {
-  name: string;
-  status: AgentStatus;
-  active: boolean;
-};
+export type { DisplayState, TrayRow } from "./agent-state.ts";
 
 /** Inset the text; the row's shading still spans the full Tray width. */
 const ROW_PADDING_LEFT = 1;
 const ICON_COLUMN = 2;
 
 /**
- * agentmux knows whether the pane is alive, nothing finer, so a running Agent
- * wears fx's "no classification yet" dot and an exited one the stopped square.
- * Both are single-width BMP glyphs; a wide glyph would shift the column.
+ * The icon carries the whole state, in fmx's glyphs. fmx varies a blocked
+ * Agent's glyph by the attention kind fx reports; agentmux reads state from
+ * the screen and knows only that the harness waits, so blocked is always `×`.
+ * Every glyph is single-width BMP; a wide glyph would shift the column.
  */
-export function statusIcon(status: AgentStatus): string {
-  switch (status) {
-    case "running":
+export function stateIcon(state: DisplayState): string {
+  switch (state) {
+    case "blocked":
+      return "×";
+    case "working":
+      return "◐";
+    case "done":
+      return "✓";
+    case "idle":
+      return "○";
+    case "unknown":
       return "·";
-    case "exited":
-      return "■";
   }
 }
 
-/** Every status agentmux can name recedes; nothing yet earns the foreground step. */
-export function statusRole(status: AgentStatus): "dim" {
-  switch (status) {
-    case "running":
-    case "exited":
+/**
+ * Which step of the ramp a state glyph is drawn in. The glyph says what the
+ * state is; the ramp says how loudly. Blocked is the brightest thing in the
+ * Tray, what needs the human, and is also set bold. Done sits one step
+ * brighter than its row, the way fx marks a finished tool call. Everything
+ * else recedes. No hue: the shapes are distinct on their own.
+ */
+export function stateRole(state: DisplayState): "foreground" | "accent" | "dim" {
+  switch (state) {
+    case "blocked":
+      return "foreground";
+    case "done":
+      return "accent";
+    case "working":
+    case "idle":
+    case "unknown":
       return "dim";
   }
 }
@@ -140,7 +155,7 @@ export class TrayList {
   }
 
   private signatureOf(row: TrayRow, width: number): string {
-    return [width, this.themeGeneration, row.status, row.active, row.name].join(" ");
+    return [width, this.themeGeneration, row.state, row.active, row.name].join(" ");
   }
 
   private buildRow(row: TrayRow, key: string, width: number): RenderedRow {
@@ -178,8 +193,9 @@ export class TrayList {
 
   private styleRow(row: TrayRow, width: number): StyledText {
     const ramp = this.ramp;
+    const glyph = fg(ramp[stateRole(row.state)])(`${stateIcon(row.state)} `);
     const chunks: TextChunk[] = [
-      fg(ramp[statusRole(row.status)])(`${statusIcon(row.status)} `),
+      row.state === "blocked" ? bold(glyph) : glyph,
       // The selected row's name steps up to the primary: dim text on the raised
       // fill is the one place the Tray asks a name to be read against something
       // other than the background it was measured from.

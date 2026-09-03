@@ -21,7 +21,8 @@ Screen. agentwork ships programs, never the operator's config.
 ```
 bin/tray              the Tray app's entry: reads AGENTMUX_SOCKET and AGENTMUX_THEME
 config.example        an instance config using this setup, to copy
-src/tui/tray.ts       the Tray app: mirrors agent.list, a row press is agent.show
+src/tui/tray.ts       the Tray app: mirrors agent.list and each state change, a row press is agent.show
+src/tui/agent-state.ts  the model: fmx's five display states from agentmux's four, and what the human has seen
 src/tui/tray-list.ts  the row painter
 src/tui/ramp.ts       the fxnk ramp, as agentmux's Screen paints it
 test/                 bun test
