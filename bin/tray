@@ -1,0 +1,17 @@
+#!/usr/bin/env bun
+// The Tray app: agentmux runs this in the Tray column when an instance's
+// config says `tray = tray` with `setup = <this checkout>`. It finds the
+// instance in the environment agentmux gives every part.
+import { runTray } from "../src/tui/tray.ts";
+
+const socket = process.env["AGENTMUX_SOCKET"];
+if (!socket) {
+  process.stderr.write("tray: runs inside agentmux; AGENTMUX_SOCKET is not set\n");
+  process.exit(2);
+}
+process.exit(
+  await runTray({
+    apiSocket: socket,
+    theme: process.env["AGENTMUX_THEME"] === "light" ? "light" : "dark",
+  }),
+);

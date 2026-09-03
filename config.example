@@ -1,0 +1,16 @@
+# An agentmux instance config that uses this setup. Copy it to
+# ~/.config/agentmux/instances/<name>, adjust, then `agentmux start`.
+# `agentmux check` reads it and says what is wrong.
+
+setup = ~/code/agentwork
+
+prefix = ctrl+b
+
+tray = tray
+tray.visible = true
+tray-slot = agentmux screen --text slot
+tray-slot.visible = false
+workspace-pane = agentmux screen --text workspace
+workspace-pane.visible = false
+right-tray = agentmux screen --text agent
+right-tray.visible = false

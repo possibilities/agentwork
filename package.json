@@ -1,19 +1,16 @@
 {
   "name": "agentwork",
   "version": "0.1.0",
-  "description": "A reference agentmux setup: the Tray app and a config naming a TUI for each part",
+  "description": "A reference agentmux setup: bin/tray, the agent list, for the Tray column",
   "private": true,
   "license": "MIT",
   "type": "module",
-  "bin": {
-    "agentwork": "./src/main.ts"
-  },
   "engines": {
     "bun": ">=1.3.14"
   },
   "scripts": {
     "lint": "biome check .",
-    "format": "biome check --write src test scripts",
+    "format": "biome check --write src test bin scripts",
     "typecheck": "tsc --noEmit",
     "test": "bun test --timeout 20000",
     "check": "bun run lint && bun run typecheck && bun run test"
