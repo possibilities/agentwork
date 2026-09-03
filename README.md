@@ -1,7 +1,7 @@
 # agentwork
 
 A reference setup for [agentmux](../agentmux): `bin/tray`, the agent list
-that runs in the Tray column. An agentmux instance uses it by naming this
+that runs in the Tray. An agentmux instance uses it by naming this
 checkout in its config; there is no agentwork command.
 
 ## Use
@@ -20,23 +20,28 @@ setup = ~/code/agentwork
 
 prefix = ctrl+space
 
-tray = tray
+tray.command = tray
 tray.visible = true
 tray.width = 26
-tray-slot = agentmux screen --text slot
-tray-slot.visible = false
-tray-slot.height = 8
-workspace-pane = agentmux screen --text workspace
-workspace-pane.visible = false
-workspace-pane.width = 40
-right-tray = agentmux screen --text agent
-right-tray.visible = false
-right-tray.width = 40
+
+drawer.command = agentmux screen --text drawer
+drawer.visible = false
+drawer.height = 8
+
+canvas.command = agentmux screen --text canvas
+canvas.visible = false
+canvas.width = 40
+
+rail.command = agentmux screen --text rail
+rail.visible = false
+rail.width = 40
 ```
 
 `setup` puts this checkout's `bin/` first on every part app's PATH and
-makes it their working directory, so `tray = tray` is `bin/tray` here. Any
-program that speaks agentmux's socket can take a part's line instead;
+makes it their working directory, so `tray.command = tray` is `bin/tray`
+here. The parts are the Tray, the Drawer under it, the Canvas between Tray
+and Viewport, and the Rail right of the Viewport. Any program that speaks
+agentmux's socket can take a part's `command` instead;
 `agentmux screen --text LINE` is agentmux's placeholder as a program.
 `<part>.visible` and the sizes seed the first start only; the instance
 remembers them after. The
