@@ -1,7 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import type { BoxRenderable, TextRenderable } from "@opentui/core";
+import { type BoxRenderable, RGBA, type TextRenderable } from "@opentui/core";
 import { createTestRenderer } from "@opentui/core/testing";
-import { rowText, stateIcon, stateRole, TrayList, truncate } from "../src/tui/tray-list.ts";
+import { fxnkRamp } from "../src/tui/ramp.ts";
+import { rowText, stateColor, stateIcon, TrayList, truncate } from "../src/tui/tray-list.ts";
 
 async function createList(width: number, height: number) {
   const setup = await createTestRenderer({ width, height });
@@ -12,20 +13,21 @@ async function createList(width: number, height: number) {
 }
 
 describe("tray rows", () => {
-  test("carry state as fmx's single-width glyph in a ramp step, never a hue", () => {
-    expect(stateIcon("blocked")).toBe("×");
-    expect(stateIcon("working")).toBe("◐");
-    expect(stateIcon("done")).toBe("✓");
+  test("carry state as herdr's dots: one glyph shape, a hue from the terminal's slots", () => {
+    expect(stateIcon("blocked")).toBe("●");
+    expect(stateIcon("working")).toBe("●");
+    expect(stateIcon("done")).toBe("●");
     expect(stateIcon("idle")).toBe("○");
     expect(stateIcon("unknown")).toBe("·");
     for (const state of ["blocked", "working", "done", "idle", "unknown"] as const) {
       expect([...stateIcon(state)]).toHaveLength(1);
     }
-    expect(stateRole("blocked")).toBe("foreground");
-    expect(stateRole("done")).toBe("accent");
-    expect(stateRole("working")).toBe("dim");
-    expect(stateRole("idle")).toBe("dim");
-    expect(stateRole("unknown")).toBe("dim");
+    const ramp = fxnkRamp("dark");
+    expect(stateColor("blocked", ramp)).toEqual(RGBA.fromIndex(1));
+    expect(stateColor("working", ramp)).toEqual(RGBA.fromIndex(3));
+    expect(stateColor("done", ramp)).toEqual(RGBA.fromIndex(6));
+    expect(stateColor("idle", ramp)).toEqual(RGBA.fromIndex(2));
+    expect(stateColor("unknown", ramp)).toEqual(ramp.dim);
   });
 
   test("truncate only at the right-hand end", () => {
@@ -55,9 +57,9 @@ describe("tray list", () => {
       );
       await setup.renderOnce();
       const frame = setup.captureCharFrame().split("\n");
-      expect(frame[0]).toStartWith(" × claude-1");
-      expect(frame[1]).toStartWith(" ◐ claude-2");
-      expect(frame[2]).toStartWith(" ✓ codex-1");
+      expect(frame[0]).toStartWith(" ● claude-1");
+      expect(frame[1]).toStartWith(" ● claude-2");
+      expect(frame[2]).toStartWith(" ● codex-1");
       expect(frame[3]).toStartWith(" ○ codex-2");
       expect(frame[4]).toStartWith(" · sh-1");
 
@@ -81,26 +83,28 @@ describe("tray list", () => {
     }
   });
 
-  test("a blocked row's glyph is the only bold thing, in the foreground step", async () => {
+  test("the dot alone carries hue; the name stays on the ramp", async () => {
     const { setup, list } = await createList(30, 6);
     try {
       list.render(
         [
           { name: "claude-1", state: "blocked", active: false },
-          { name: "claude-2", state: "working", active: false },
+          { name: "claude-2", state: "working", active: true },
         ],
         26,
       );
       await setup.renderOnce();
-      const blocked = setup.renderer.root.findDescendantById(
-        "tray-row-text-agent-claude-1",
-      ) as TextRenderable;
-      const working = setup.renderer.root.findDescendantById(
-        "tray-row-text-agent-claude-2",
-      ) as TextRenderable;
-      const chunk = (text: TextRenderable) => (text.content as { chunks: unknown[] }).chunks[0];
-      expect(JSON.stringify(chunk(blocked))).toContain('"attributes":1');
-      expect(JSON.stringify(chunk(working))).not.toContain('"attributes":1');
+      const chunks = (id: string) =>
+        (
+          (setup.renderer.root.findDescendantById(id) as TextRenderable).content as {
+            chunks: Array<{ fg?: RGBA }>;
+          }
+        ).chunks;
+      const ramp = fxnkRamp("dark");
+      expect(chunks("tray-row-text-agent-claude-1")[0]!.fg).toEqual(RGBA.fromIndex(1));
+      expect(chunks("tray-row-text-agent-claude-1")[1]!.fg).toEqual(ramp.dim);
+      expect(chunks("tray-row-text-agent-claude-2")[0]!.fg).toEqual(RGBA.fromIndex(3));
+      expect(chunks("tray-row-text-agent-claude-2")[1]!.fg).toEqual(ramp.foreground);
     } finally {
       list.root.destroy();
       setup.renderer.destroy();
@@ -125,7 +129,7 @@ describe("tray list", () => {
       await setup.renderOnce();
       const after = setup.renderer.root.findDescendantById("tray-row-agent-claude-1");
       expect(after).toBe(before);
-      expect(setup.captureCharFrame().split("\n")[0]).toStartWith(" × claude-1");
+      expect(setup.captureCharFrame().split("\n")[0]).toStartWith(" ● claude-1");
     } finally {
       list.root.destroy();
       setup.renderer.destroy();

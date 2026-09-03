@@ -1,8 +1,8 @@
 import {
   BoxRenderable,
-  bold,
   type CliRenderer,
   fg,
+  RGBA,
   StyledText,
   type TextChunk,
   TextRenderable,
@@ -13,9 +13,10 @@ import { fxnkRamp, type Ramp, type Theme } from "./ramp.ts";
 /**
  * fmx's Tray row painter (`~/code/fmx/src/session-list.ts`) with the tree
  * flattened: agentmux has one row per Agent and no project or branch rungs.
- * Everything else is kept: glyph plus name, weight and ramp step for state,
- * only the active row filled, selection on mouse-down, rows reused across
- * renders because OpenTUI's handle table is never reclaimed.
+ * Rows, fills, selection and reuse are fmx's. The state mark is herdr's
+ * default "dots" style instead of fmx's shapes: the operator's terminal font
+ * lacks the geometric shapes, so each shape fell back to a different font at
+ * a different size, while a dot in one of three hues reads the same everywhere.
  */
 export type { DisplayState, TrayRow } from "./agent-state.ts";
 
@@ -24,19 +25,16 @@ const ROW_PADDING_LEFT = 1;
 const ICON_COLUMN = 2;
 
 /**
- * The icon carries the whole state, in fmx's glyphs. fmx varies a blocked
- * Agent's glyph by the attention kind fx reports; agentmux reads state from
- * the screen and knows only that the harness waits, so blocked is always `×`.
- * Every glyph is single-width BMP; a wide glyph would shift the column.
+ * herdr's dots (`src/client/shell.rs`, `status_icon` for `dots`): a filled
+ * dot for working, blocked and done, told apart by hue; a ring for idle; a
+ * middle dot for unknown. Every glyph is single-width BMP.
  */
 export function stateIcon(state: DisplayState): string {
   switch (state) {
     case "blocked":
-      return "×";
     case "working":
-      return "◐";
     case "done":
-      return "✓";
+      return "●";
     case "idle":
       return "○";
     case "unknown":
@@ -45,22 +43,23 @@ export function stateIcon(state: DisplayState): string {
 }
 
 /**
- * Which step of the ramp a state glyph is drawn in. The glyph says what the
- * state is; the ramp says how loudly. Blocked is the brightest thing in the
- * Tray, what needs the human, and is also set bold. Done sits one step
- * brighter than its row, the way fx marks a finished tool call. Everything
- * else recedes. No hue: the shapes are distinct on their own.
+ * herdr's hue per state (`status_color`): working yellow, blocked red, done
+ * teal, idle green, unknown the ramp's dim step. The hues are the terminal's
+ * own ANSI slots, so they follow its theme, as fxnk's focus and error slots
+ * do; nothing here is sampled or hard-coded.
  */
-export function stateRole(state: DisplayState): "foreground" | "accent" | "dim" {
+export function stateColor(state: DisplayState, ramp: Ramp): RGBA {
   switch (state) {
-    case "blocked":
-      return "foreground";
-    case "done":
-      return "accent";
     case "working":
+      return RGBA.fromIndex(3);
+    case "blocked":
+      return RGBA.fromIndex(1);
+    case "done":
+      return RGBA.fromIndex(6);
     case "idle":
+      return RGBA.fromIndex(2);
     case "unknown":
-      return "dim";
+      return ramp.dim;
   }
 }
 
@@ -193,9 +192,8 @@ export class TrayList {
 
   private styleRow(row: TrayRow, width: number): StyledText {
     const ramp = this.ramp;
-    const glyph = fg(ramp[stateRole(row.state)])(`${stateIcon(row.state)} `);
     const chunks: TextChunk[] = [
-      row.state === "blocked" ? bold(glyph) : glyph,
+      fg(stateColor(row.state, ramp))(`${stateIcon(row.state)} `),
       // The selected row's name steps up to the primary: dim text on the raised
       // fill is the one place the Tray asks a name to be read against something
       // other than the background it was measured from.
