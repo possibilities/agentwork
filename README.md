@@ -22,6 +22,7 @@ prefix = ctrl+space
 
 left.command = tray
 left.description = The agent list
+left.needs-agents = true
 left.visible = true
 left.width = 26
 
