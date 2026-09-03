@@ -2,7 +2,7 @@
 
 A reference agentmux Setup: `bin/tray`, the agent list, for the left panel.
 An agentmux instance uses it by saying `setup = ~/code/agentwork`
-and `left.command = tray` in its config; agentmux (`~/code/agentmux`) is the
+and `command = tray` under `[panel left]` in its config; agentmux (`~/code/agentmux`) is the
 multiplexer, the API, the CLI, the config grammar and the placeholder
 Screen. agentwork ships programs, never the operator's config.
 

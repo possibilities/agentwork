@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 // The Tray app: agentmux runs this in the left panel when an instance's
-// config says `left.command = tray` with `setup = <this checkout>`. It finds the
+// config says `command = tray` under `[panel left]` with `setup = <this checkout>`. It finds the
 // instance in the environment agentmux gives every panel.
 import { runTray } from "../src/tui/tray.ts";
 
