@@ -22,18 +22,24 @@ prefix = ctrl+space
 
 tray = tray
 tray.visible = true
+tray.width = 26
 tray-slot = agentmux screen --text slot
 tray-slot.visible = false
+tray-slot.height = 8
 workspace-pane = agentmux screen --text workspace
 workspace-pane.visible = false
+workspace-pane.width = 40
 right-tray = agentmux screen --text agent
 right-tray.visible = false
+right-tray.width = 40
 ```
 
 `setup` puts this checkout's `bin/` first on every part app's PATH and
 makes it their working directory, so `tray = tray` is `bin/tray` here. Any
 program that speaks agentmux's socket can take a part's line instead;
-`agentmux screen --text LINE` is agentmux's placeholder as a program. The
+`agentmux screen --text LINE` is agentmux's placeholder as a program.
+`<part>.visible` and the sizes seed the first start only; the instance
+remembers them after. The
 part apps find `AGENTMUX_INSTANCE`, `AGENTMUX_SOCKET`, `AGENTMUX_MCP_URL`,
 `AGENTMUX_MCP_TOKEN` and `AGENTMUX_THEME` in their environment. agentmux's
 README says the rest of the grammar; the operator's file is theirs to keep
