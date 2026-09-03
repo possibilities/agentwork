@@ -19,7 +19,7 @@ export async function runTray(options: { apiSocket: string; theme: Theme }): Pro
     screenMode: "alternate-screen",
     targetFps: 30,
     autoFocus: false,
-    // Resizes are timed below; OpenTUI's own pass would paint tmux's scaled size first.
+    // Resizes are timed below; OpenTUI's own pass would paint the transient size.
     debounceDelay: 1000,
   });
   let theme = options.theme;
@@ -100,10 +100,11 @@ export async function runTray(options: { apiSocket: string; theme: Theme }): Pro
   }
 
   renderer.on("resize", paint);
-  // tmux gives a pane two sizes per window resize: the scaled layout at
-  // once, then the fixed one a throttled quarter second later. As agentmux's
-  // Screen does: clear at once, hold the update open (synchronized output),
-  // and take the size only once it has been still longer than the throttle.
+  // The daemon sizes the window itself, so this pane hears one size per
+  // terminal resize, or two ten milliseconds apart when its size ends where
+  // it began (tmux's own rule for fixed-width panes). As agentmux's Screen
+  // does: clear at once, wait out the second telling, then take the size
+  // and repaint every cell.
   let settle: ReturnType<typeof setTimeout> | null = null;
   const onResize = () => {
     process.stdout.write("\x1b[?2026h\x1b[?25l\x1b[2J\x1b[H");
@@ -112,15 +113,12 @@ export async function runTray(options: { apiSocket: string; theme: Theme }): Pro
       settle = null;
       const width = Math.max(1, process.stdout.columns || renderer.width);
       const height = Math.max(1, process.stdout.rows || renderer.height);
-      // A resize rebuilds OpenTUI's buffers blank, matching the cleared
-      // terminal, so the next frame writes every cell; an unchanged size
-      // needs the detour or nothing would be written.
       if (width === renderer.width && height === renderer.height) {
         renderer.resize(width, Math.max(1, height - 1));
       }
       renderer.resize(width, height);
       paint();
-    }, 350);
+    }, 40);
   };
   process.stdout.on("resize", onResize);
   const code = await done;
