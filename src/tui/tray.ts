@@ -19,7 +19,7 @@ export async function runTray(options: { apiSocket: string; theme: Theme }): Pro
     screenMode: "alternate-screen",
     targetFps: 30,
     autoFocus: false,
-    // Resizes are timed below; OpenTUI's own pass would paint the transient size.
+    // Every resize is taken at once below; OpenTUI's own pass would only repeat it.
     debounceDelay: 1000,
   });
   let theme = options.theme;
@@ -100,29 +100,22 @@ export async function runTray(options: { apiSocket: string; theme: Theme }): Pro
   }
 
   renderer.on("resize", paint);
-  // The daemon sizes the window itself, so this pane hears one size per
-  // terminal resize, or two ten milliseconds apart when its size ends where
-  // it began (tmux's own rule for fixed-width panes). As agentmux's Screen
-  // does: clear at once, wait out the second telling, then take the size
-  // and repaint every cell.
-  let settle: ReturnType<typeof setTimeout> | null = null;
+  // The daemon sizes the window itself, so this pane hears its size at
+  // once. OpenTUI repaints only what differs from its model, blank after a
+  // resize, so as agentmux's Screen does: clear inside a synchronized
+  // update and repaint every cell in the same update; nothing blank shows.
   const onResize = () => {
+    const width = Math.max(1, process.stdout.columns || renderer.width);
+    const height = Math.max(1, process.stdout.rows || renderer.height);
     process.stdout.write("\x1b[?2026h\x1b[?25l\x1b[2J\x1b[H");
-    if (settle) clearTimeout(settle);
-    settle = setTimeout(() => {
-      settle = null;
-      const width = Math.max(1, process.stdout.columns || renderer.width);
-      const height = Math.max(1, process.stdout.rows || renderer.height);
-      if (width === renderer.width && height === renderer.height) {
-        renderer.resize(width, Math.max(1, height - 1));
-      }
-      renderer.resize(width, height);
-      paint();
-    }, 40);
+    if (width === renderer.width && height === renderer.height) {
+      renderer.resize(width, Math.max(1, height - 1));
+    }
+    renderer.resize(width, height);
+    paint();
   };
   process.stdout.on("resize", onResize);
   const code = await done;
-  if (settle) clearTimeout(settle);
   process.stdout.off("resize", onResize);
   client.close();
   renderer.destroy();
