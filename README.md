@@ -21,6 +21,7 @@ setup = ~/code/agentwork
 prefix = ctrl+space
 
 tray.command = tray
+tray.description = The agent list
 tray.visible = true
 tray.width = 26
 
