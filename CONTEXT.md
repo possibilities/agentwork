@@ -15,7 +15,6 @@ one command line per Part (`tray`, `tray-slot`, `workspace-pane`,
 the Part back to agentmux's placeholder. Visibility is not in it. _Avoid_:
 layout file, profile, settings.
 
-**Apply** — putting the Config on an Instance: `tray.set_app`,
-`tray.slot.set_app`, one `workspace` util in the workspace pane, and the
-right-Tray app for every Agent that exists; the Tray app gives it to each
-Agent that appears later. Idempotent. _Avoid_: sync, deploy, install.
+**Apply** — putting the Config on an Instance: one `set_app` per Part
+with a command, `clear_app` for the rest. Idempotent. _Avoid_: sync,
+deploy, install.

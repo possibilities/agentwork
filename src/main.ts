@@ -2,7 +2,7 @@
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { ApiClient } from "agentmux/client";
-import { applyConfig, followAgents } from "./apply.ts";
+import { applyConfig } from "./apply.ts";
 import {
   type Config,
   ConfigError,
@@ -122,24 +122,10 @@ async function main(argv: string[]): Promise<number> {
     const { runTray } = await import("./tui/tray.ts");
     const socket = process.env["AGENTMUX_SOCKET"];
     if (!socket) throw new UsageError("tray runs inside agentmux; AGENTMUX_SOCKET is not set");
-    // The Tray app is agentwork's resident presence in the Instance, alive
-    // exactly while Agents exist, so it is what keeps the right Tray true for
-    // Agents that appear later. A bad config must not take the Tray down:
-    // agentmux would respawn it forever.
-    let follower: { stop: () => void } | null = null;
-    try {
-      follower = await followAgents(socket, await loadConfig(flags.config));
-    } catch (error) {
-      process.stderr.write(`agentwork: not following agents: ${(error as Error).message}\n`);
-    }
-    try {
-      return await runTray({
-        apiSocket: socket,
-        theme: process.env["AGENTMUX_THEME"] === "light" ? "light" : "dark",
-      });
-    } finally {
-      follower?.stop();
-    }
+    return runTray({
+      apiSocket: socket,
+      theme: process.env["AGENTMUX_THEME"] === "light" ? "light" : "dark",
+    });
   }
   await ensureConfigFile(flags.config);
   const config = await loadConfig(flags.config);

@@ -20,8 +20,8 @@ placeholder Screen; agentwork only says what runs where, over that API.
 ```
 src/main.ts         CLI: start, attach, apply, tray
 src/config.ts       ~/.config/agentwork/config: instance plus a command per part
-src/apply.ts        puts the config on an Instance over the socket; the Agent follower
-src/tui/tray.ts     the Tray app: mirrors agent.list, a row press is agent.show; hosts the follower
+src/apply.ts        puts the config on an Instance over the socket
+src/tui/tray.ts     the Tray app: mirrors agent.list, a row press is agent.show
 src/tui/tray-list.ts  the row painter
 src/tui/ramp.ts     the fxnk ramp, as agentmux's Screen paints it
 test/               bun test

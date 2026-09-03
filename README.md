@@ -51,8 +51,6 @@ Screen while there is none.
 
 `agentwork tray` is what agentmux runs in the Tray column: one row per
 agent, the shown one filled, in fmx's design and fxnk monochrome. Pressing
-a row shows that agent. It never takes focus and reads no keys. It is also
-agentwork's resident presence in the instance: the right Tray is per agent
-in agentmux, so the Tray app gives each new agent the config's `right-tray`
-command as it appears. A config that replaces the Tray app loses that until
-agentmux grows a default right-Tray app.
+a row shows that agent. It never takes focus and reads no keys. Any TUI
+that speaks the socket can take its place in the config; nothing else in
+agentwork depends on it.
