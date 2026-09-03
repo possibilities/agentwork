@@ -32,6 +32,11 @@ tray = agentwork tray
 tray-slot = agentmux screen --text slot
 workspace-pane = agentmux screen --text workspace
 right-tray = agentmux screen --text agent
+
+tray.visible = true
+tray-slot.visible = false
+workspace-pane.visible = false
+right-tray.visible = false
 ```
 
 A part's value is a command line, split on whitespace, run in that part's
@@ -41,11 +46,13 @@ a TUI needs to join the instance. `agentmux screen --text LINE` is
 agentmux's placeholder as a program. An empty value hands the part back to
 that placeholder.
 
-Whether a part is on screen is agentmux's business, remembered per
-instance and changed by its verbs (`tray.slot.show`, `workspacePane.show`,
-`rightTray.show`, and their `hide`s); agentwork only says what runs there.
-The Viewport is not in the config: it shows the agent, and the no-agents
-Screen while there is none.
+Each part also has a `<part>.visible` boolean, applied with the apps: the
+tray is shown by default and the other three hidden. Between applies,
+agentmux's own verbs (`tray.slot.show`, `workspacePane.show`,
+`rightTray.show`, and their `hide`s) change what is on screen, and the
+instance remembers that; the next `apply`, `start` or `attach` puts the
+config's answer back. The Viewport is not in the config: it shows the
+agent, and the no-agents Screen while there is none.
 
 ## The Tray app
 

@@ -7,7 +7,7 @@ function appFor(argv: string[] | undefined): App | null {
   return argv ? { kind: "command", command: argv } : null;
 }
 
-/** The agentmux verbs behind each config key; every part has the same two. */
+/** The agentmux verbs behind each config key; every part has the same four. */
 const VERBS: Record<
   Part,
   {
@@ -25,11 +25,24 @@ const VERBS: Record<
   "right-tray": { set: "rightTray.set_app", clear: "rightTray.clear_app" },
 };
 
+const VISIBILITY: Record<
+  Part,
+  {
+    show: "tray.show" | "tray.slot.show" | "workspacePane.show" | "rightTray.show";
+    hide: "tray.hide" | "tray.slot.hide" | "workspacePane.hide" | "rightTray.hide";
+  }
+> = {
+  tray: { show: "tray.show", hide: "tray.hide" },
+  "tray-slot": { show: "tray.slot.show", hide: "tray.slot.hide" },
+  "workspace-pane": { show: "workspacePane.show", hide: "workspacePane.hide" },
+  "right-tray": { show: "rightTray.show", hide: "rightTray.hide" },
+};
+
 /**
  * Put the config on the Instance: an app on every configured part, the
- * placeholder on every part the config leaves out. Visibility is untouched;
- * agentmux remembers each part's wish. Idempotent: agentmux only restarts a
- * pane whose app actually changed.
+ * placeholder on every part the config leaves out, and each part shown or
+ * hidden as its `.visible` says. Idempotent: agentmux only restarts a pane
+ * whose app actually changed, and a show on a shown part is a no-op.
  */
 export async function applyConfig(client: ApiClient, config: Config): Promise<void> {
   for (const part of Object.keys(VERBS) as Part[]) {
@@ -40,5 +53,6 @@ export async function applyConfig(client: ApiClient, config: Config): Promise<vo
       // The slot has no clear verb; its placeholder is set by hand.
       await client.request(verbs.clear, { app: { kind: "placeholder", text: "slot" } });
     } else await client.request(verbs.clear);
+    await client.request(config.visible[part] ? VISIBILITY[part].show : VISIBILITY[part].hide);
   }
 }

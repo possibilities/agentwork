@@ -19,6 +19,8 @@ export type Config = {
   instance: string;
   /** argv per part; absent means leave the part to agentmux's placeholder. */
   parts: Partial<Record<Part, string[]>>;
+  /** Whether each part is on screen once the config is applied. */
+  visible: Record<Part, boolean>;
 };
 
 export const DEFAULT_CONFIG: Config = {
@@ -29,6 +31,7 @@ export const DEFAULT_CONFIG: Config = {
     "workspace-pane": ["agentmux", "screen", "--text", "workspace"],
     "right-tray": ["agentmux", "screen", "--text", "agent"],
   },
+  visible: { tray: true, "tray-slot": false, "workspace-pane": false, "right-tray": false },
 };
 
 /** The default config, as the file agentwork writes when there is none; README.md explains the keys. */
@@ -38,6 +41,11 @@ tray = agentwork tray
 tray-slot = agentmux screen --text slot
 workspace-pane = agentmux screen --text workspace
 right-tray = agentmux screen --text agent
+
+tray.visible = true
+tray-slot.visible = false
+workspace-pane.visible = false
+right-tray.visible = false
 `;
 
 export class ConfigError extends Error {}
@@ -48,7 +56,11 @@ export function defaultConfigPath(): string {
 }
 
 export function parseConfig(text: string, base: Config = DEFAULT_CONFIG): Config {
-  const config: Config = { instance: base.instance, parts: { ...base.parts } };
+  const config: Config = {
+    instance: base.instance,
+    parts: { ...base.parts },
+    visible: { ...base.visible },
+  };
   const lines = text.split("\n");
   for (let index = 0; index < lines.length; index += 1) {
     const raw = lines[index]!;
@@ -67,6 +79,14 @@ export function parseConfig(text: string, base: Config = DEFAULT_CONFIG): Config
       const part = key as Part;
       if (value.length === 0) delete config.parts[part];
       else config.parts[part] = value.split(/\s+/);
+    } else if (
+      key.endsWith(".visible") &&
+      (PARTS as readonly string[]).includes(key.slice(0, -8))
+    ) {
+      const part = key.slice(0, -8) as Part;
+      if (value === "true") config.visible[part] = true;
+      else if (value === "false") config.visible[part] = false;
+      else throw new ConfigError(`line ${index + 1}: ${key} must be true or false`);
     } else {
       throw new ConfigError(`line ${index + 1}: unknown key "${key}"`);
     }
