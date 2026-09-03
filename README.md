@@ -23,11 +23,11 @@ agentwork attach           # shape a running instance and attach
 agentwork apply            # shape a running instance and return
 ```
 
-The first run writes `~/.config/agentwork/config`:
+Each instance has one file, `~/.config/agentwork/instances/<name>`;
+`--instance NAME` picks it, `default` when not given. The first run writes
+it:
 
 ```
-instance = default
-
 tray = agentwork tray
 tray-slot = agentmux screen --text slot
 workspace-pane = agentmux screen --text workspace
@@ -38,6 +38,20 @@ tray-slot.visible = false
 workspace-pane.visible = false
 right-tray.visible = false
 ```
+
+The same file is agentmux's config for that instance: `agentwork start`
+hands it to `agentmux start --config`, so agentmux's own keys live here
+too and nowhere else:
+
+```
+prefix = ctrl+space
+harness.claude.default-model = opus-1m
+```
+
+agentwork passes those through without reading them, and agentmux ignores
+agentwork's. agentmux reads its keys at start only, so a change to them
+needs a stop and start; the part lines apply on every `apply`, `start` or
+`attach`.
 
 A part's value is a command line, split on whitespace, run in that part's
 pane. It finds `AGENTMUX_INSTANCE`, `AGENTMUX_SOCKET`, `AGENTMUX_MCP_URL`,

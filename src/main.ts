@@ -7,7 +7,8 @@ import {
   type Config,
   ConfigError,
   DEFAULT_CONFIG_TEXT,
-  defaultConfigPath,
+  DEFAULT_INSTANCE,
+  instanceConfigPath,
   loadConfig,
 } from "./config.ts";
 
@@ -15,39 +16,40 @@ const VERSION = "0.1.0";
 
 const HELP = `agentwork ${VERSION} — a reference agentmux setup: the Tray app and a config naming a TUI for each part
 
-usage: agentwork <command> [--config PATH]
+usage: agentwork <command> [--instance NAME]
 
 commands
-  start      start the config's agentmux instance if needed and put the config on it
-  attach     put the config on the instance and attach this terminal to it
-  apply      put the config on a running instance
+  start      start the instance if needed (agentmux start --config <its file>) and apply
+  attach     apply the instance's config and attach this terminal to it
+  apply      apply the instance's config to it while it runs
   tray       the Tray app: the Agent list, for the Tray column (agentmux runs this)
 
 options
-  --config PATH     config file (default: ~/.config/agentwork/config)
+  --instance NAME   the instance; its config is ~/.config/agentwork/instances/NAME
+                    (default: default)
   --attach          with start: attach once the instance is shaped
   --help, --version
 
-The config names the instance and a command for each part: tray, tray-slot,
-workspace-pane, right-tray. Whether a part is visible is agentmux's business
-(its tray.*, workspacePane.* and rightTray.* verbs); agentwork only says what
-runs there. Read README.md, then agentmux's USAGE.md.
+An instance's config names a command and a .visible boolean for each part
+(tray, tray-slot, workspace-pane, right-tray), and carries agentmux's own
+keys (prefix, harness.*, family.*), which agentmux reads from the same file.
+Read README.md, then agentmux's USAGE.md.
 `;
 
 class UsageError extends Error {}
 
-type Flags = { config: string; attach: boolean; positional: string[] };
+type Flags = { instance: string; attach: boolean; positional: string[] };
 
 function parseArgs(argv: string[]): Flags {
-  const flags: Flags = { config: defaultConfigPath(), attach: false, positional: [] };
+  const flags: Flags = { instance: DEFAULT_INSTANCE, attach: false, positional: [] };
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index]!;
-    if (arg === "--config") {
+    if (arg === "--instance") {
       const value = argv[index + 1];
-      if (value === undefined) throw new UsageError("--config needs a value");
-      flags.config = value;
+      if (value === undefined) throw new UsageError("--instance needs a value");
+      flags.instance = value;
       index += 1;
-    } else if (arg.startsWith("--config=")) flags.config = arg.slice("--config=".length);
+    } else if (arg.startsWith("--instance=")) flags.instance = arg.slice("--instance=".length);
     else if (arg === "--attach") flags.attach = true;
     else if (arg.startsWith("--")) throw new UsageError(`unknown option ${arg}`);
     else flags.positional.push(arg);
@@ -94,7 +96,7 @@ async function apply(socket: string, config: Config): Promise<void> {
   }
 }
 
-/** The config file is written once so the human has every part's line to edit. */
+/** The instance's config is written once so the human has every part's line to edit. */
 async function ensureConfigFile(path: string): Promise<void> {
   if (await Bun.file(path).exists()) return;
   mkdirSync(dirname(path), { recursive: true });
@@ -102,9 +104,9 @@ async function ensureConfigFile(path: string): Promise<void> {
   process.stderr.write(`wrote ${path}\n`);
 }
 
-async function attach(config: Config, socket: string): Promise<number> {
+async function attach(instance: string, config: Config, socket: string): Promise<number> {
   await apply(socket, config);
-  return agentmux(["attach", "--instance", config.instance]);
+  return agentmux(["attach", "--instance", instance]);
 }
 
 async function main(argv: string[]): Promise<number> {
@@ -127,32 +129,35 @@ async function main(argv: string[]): Promise<number> {
       theme: process.env["AGENTMUX_THEME"] === "light" ? "light" : "dark",
     });
   }
-  await ensureConfigFile(flags.config);
-  const config = await loadConfig(flags.config);
+  const instance = flags.instance;
+  const configPath = instanceConfigPath(instance);
+  await ensureConfigFile(configPath);
+  const config = await loadConfig(configPath);
   switch (command) {
     case "start": {
-      let status = await instanceStatus(config.instance);
+      let status = await instanceStatus(instance);
       if (!status.running) {
-        const code = await agentmux(["start", "--instance", config.instance]);
+        // The same file is agentmux's config for this instance.
+        const code = await agentmux(["start", "--instance", instance, "--config", configPath]);
         if (code !== 0) return code;
-        status = await instanceStatus(config.instance);
+        status = await instanceStatus(instance);
       }
-      if (flags.attach) return attach(config, status.socket);
+      if (flags.attach) return attach(instance, config, status.socket);
       await apply(status.socket, config);
       return 0;
     }
     case "attach": {
-      const status = await instanceStatus(config.instance);
+      const status = await instanceStatus(instance);
       if (!status.running) {
-        process.stderr.write(`instance "${config.instance}" is not running\n`);
+        process.stderr.write(`instance "${instance}" is not running\n`);
         return 1;
       }
-      return attach(config, status.socket);
+      return attach(instance, config, status.socket);
     }
     case "apply": {
-      const status = await instanceStatus(config.instance);
+      const status = await instanceStatus(instance);
       if (!status.running) {
-        process.stderr.write(`instance "${config.instance}" is not running\n`);
+        process.stderr.write(`instance "${instance}" is not running\n`);
         return 1;
       }
       await apply(status.socket, config);
