@@ -31,16 +31,8 @@ export const DEFAULT_CONFIG: Config = {
   },
 };
 
-/** The default config, as the file agentwork writes when there is none. */
-export const DEFAULT_CONFIG_TEXT = `# agentwork — which TUI runs on each agentmux part.
-#
-# A part's value is a command line, split on whitespace, run in that part's
-# pane. Every part finds AGENTMUX_INSTANCE, AGENTMUX_SOCKET, AGENTMUX_MCP_URL,
-# AGENTMUX_MCP_TOKEN and AGENTMUX_THEME in its environment. An empty value
-# hands the part back to agentmux's placeholder. \`agentmux screen --text LINE\`
-# is that placeholder as a program.
-
-instance = default
+/** The default config, as the file agentwork writes when there is none; README.md explains the keys. */
+export const DEFAULT_CONFIG_TEXT = `instance = default
 
 tray = agentwork tray
 tray-slot = agentmux screen --text slot
