@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
-// The Tray app: agentmux runs this in the Tray when an instance's
-// config says `tray.command = tray` with `setup = <this checkout>`. It finds the
-// instance in the environment agentmux gives every part.
+// The Tray app: agentmux runs this in the left panel when an instance's
+// config says `left.command = tray` with `setup = <this checkout>`. It finds the
+// instance in the environment agentmux gives every panel.
 import { runTray } from "../src/tui/tray.ts";
 
 const socket = process.env["AGENTMUX_SOCKET"];

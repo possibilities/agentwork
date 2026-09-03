@@ -6,19 +6,19 @@ setup = ~/code/agentwork
 
 prefix = ctrl+b
 
-tray.command = tray
-tray.description = The agent list
-tray.visible = true
-tray.width = 26
+left.command = tray
+left.description = The agent list
+left.visible = true
+left.width = 26
 
 drawer.command = agentmux screen --text drawer
 drawer.visible = false
 drawer.height = 8
 
-canvas.command = agentmux screen --text canvas
-canvas.visible = false
-canvas.width = 40
+dock.command = agentmux screen --text dock
+dock.visible = false
+dock.width = 40
 
-rail.command = agentmux screen --text rail
-rail.visible = false
-rail.width = 40
+right.command = agentmux screen --text right
+right.visible = false
+right.width = 40

@@ -1,7 +1,7 @@
 # agentwork
 
 A reference setup for [agentmux](../agentmux): `bin/tray`, the agent list
-that runs in the Tray. An agentmux instance uses it by naming this
+that runs in the left panel. An agentmux instance uses it by naming this
 checkout in its config; there is no agentwork command.
 
 ## Use
@@ -20,33 +20,33 @@ setup = ~/code/agentwork
 
 prefix = ctrl+space
 
-tray.command = tray
-tray.description = The agent list
-tray.visible = true
-tray.width = 26
+left.command = tray
+left.description = The agent list
+left.visible = true
+left.width = 26
 
 drawer.command = agentmux screen --text drawer
 drawer.visible = false
 drawer.height = 8
 
-canvas.command = agentmux screen --text canvas
-canvas.visible = false
-canvas.width = 40
+dock.command = agentmux screen --text dock
+dock.visible = false
+dock.width = 40
 
-rail.command = agentmux screen --text rail
-rail.visible = false
-rail.width = 40
+right.command = agentmux screen --text right
+right.visible = false
+right.width = 40
 ```
 
-`setup` puts this checkout's `bin/` first on every part app's PATH and
-makes it their working directory, so `tray.command = tray` is `bin/tray`
-here. The parts are the Tray, the Drawer under it, the Canvas between Tray
-and Viewport, and the Rail right of the Viewport. Any program that speaks
-agentmux's socket can take a part's `command` instead;
+`setup` puts this checkout's `bin/` first on every panel app's PATH and
+makes it their working directory, so `left.command = tray` is `bin/tray`
+here. The panels are the left panel, the left drawer under it, the dock panel
+between the left panel and the agents panel, and the right panel. Any program that speaks
+agentmux's socket can take a panel's `command` instead;
 `agentmux screen --text LINE` is agentmux's placeholder as a program.
-`<part>.visible` and the sizes seed the first start only; the instance
+`<panel>.visible` and the sizes seed the first start only; the instance
 remembers them after. The
-part apps find `AGENTMUX_INSTANCE`, `AGENTMUX_SOCKET`, `AGENTMUX_MCP_URL`,
+panel apps find `AGENTMUX_INSTANCE`, `AGENTMUX_SOCKET`, `AGENTMUX_MCP_URL`,
 `AGENTMUX_MCP_TOKEN` and `AGENTMUX_THEME` in their environment. agentmux's
 README says the rest of the grammar; the operator's file is theirs to keep
 (on this machine agentstart stows it), never this repo's.
