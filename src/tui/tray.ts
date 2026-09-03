@@ -19,6 +19,8 @@ export async function runTray(options: { apiSocket: string; theme: Theme }): Pro
     screenMode: "alternate-screen",
     targetFps: 30,
     autoFocus: false,
+    // Resizes are timed below; OpenTUI's own pass would paint tmux's scaled size first.
+    debounceDelay: 1000,
   });
   let theme = options.theme;
   renderer.setBackgroundColor(core.RGBA.defaultBackground());
@@ -98,7 +100,32 @@ export async function runTray(options: { apiSocket: string; theme: Theme }): Pro
   }
 
   renderer.on("resize", paint);
+  // tmux gives a pane two sizes per window resize: the scaled layout at
+  // once, then the fixed one a throttled quarter second later. As agentmux's
+  // Screen does: clear at once, hold the update open (synchronized output),
+  // and take the size only once it has been still longer than the throttle.
+  let settle: ReturnType<typeof setTimeout> | null = null;
+  const onResize = () => {
+    process.stdout.write("\x1b[?2026h\x1b[?25l\x1b[2J\x1b[H");
+    if (settle) clearTimeout(settle);
+    settle = setTimeout(() => {
+      settle = null;
+      const width = Math.max(1, process.stdout.columns || renderer.width);
+      const height = Math.max(1, process.stdout.rows || renderer.height);
+      // A resize rebuilds OpenTUI's buffers blank, matching the cleared
+      // terminal, so the next frame writes every cell; an unchanged size
+      // needs the detour or nothing would be written.
+      if (width === renderer.width && height === renderer.height) {
+        renderer.resize(width, Math.max(1, height - 1));
+      }
+      renderer.resize(width, height);
+      paint();
+    }, 350);
+  };
+  process.stdout.on("resize", onResize);
   const code = await done;
+  if (settle) clearTimeout(settle);
+  process.stdout.off("resize", onResize);
   client.close();
   renderer.destroy();
   return code;
