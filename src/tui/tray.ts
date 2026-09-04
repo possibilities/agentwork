@@ -85,8 +85,8 @@ export async function runTray(options: { apiSocket: string; theme: Theme }): Pro
       onEvent,
       onClose: () => finish(0),
     });
-    await client.request("events.subscribe");
-    const status = await client.request("instance.status");
+    await client.request("event.subscribe");
+    const status = await client.request("instance.get");
     model.replace({ agents: status.agents, shown: status.shown });
     if (status.theme !== theme) {
       theme = status.theme;

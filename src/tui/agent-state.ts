@@ -35,7 +35,7 @@ export type TrayRow = {
 
 /**
  * The Tray app's copy of the Instance: the Agent list as the last full
- * `agents.changed` (or `instance.status`) gave it, each Agent's state as the
+ * `agents.changed` (or `instance.get`) gave it, each Agent's state as the
  * last `agent.state.changed` moved it, and which state of each Agent the
  * human has seen. Pure: no renderer, no socket.
  */
@@ -44,7 +44,7 @@ export class TrayModel {
   private shown: string | null = null;
   private readonly seen = new Map<string, string>();
 
-  /** The whole list at once: `instance.status` at start, `agents.changed` after. */
+  /** The whole list at once: `instance.get` at start, `agents.changed` after. */
   replace(changed: AgentsChanged): void {
     this.agents = changed.agents.map((agent) => ({ ...agent }));
     this.shown = changed.shown;
