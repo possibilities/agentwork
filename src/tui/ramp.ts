@@ -3,8 +3,8 @@ import { RGBA } from "@opentui/core";
 export type Theme = "dark" | "light";
 
 /**
- * fx's indexed roles plus fmx's surface carve-out, exactly as fmx paints them
- * (`~/code/fmx/src/host-palette.ts`) and as agentmux's Screen does. The
+ * fx's indexed roles plus smolmux's surface carve-out, exactly as smolmux paints them
+ * (`~/code/smolmux/src/host-palette.ts`) and as agentmux's Screen does. The
  * canvas is always the terminal's own background; no hue is ever spent on
  * state. The theme itself comes from agentmux: AGENTMUX_THEME at spawn, then
  * `theme.changed`.

@@ -12,9 +12,9 @@ Screen. agentwork ships programs, never the operator's config.
 - `CONTEXT.md` is the glossary; agentmux's is the larger one it builds on.
 - agentmux's `USAGE.md` is the mental model of the surface underneath, and
   its `README.md` has the config grammar.
-- The Tray design is fmx's (`~/code/fmx`), fxnk monochrome, with one
+- The Tray design is smolmux's (`~/code/smolmux`), fxnk monochrome, with one
   deliberate exception: the state mark is herdr's "dots" (`●` `○` `·`, hue
-  by state from the terminal's ANSI slots), because fmx's shapes are not in
+  by state from the terminal's ANSI slots), because smolmux's shapes are not in
   the operator's font and fall back at mismatched sizes. No emoji, no wide
   glyphs, no connectors, no hover, no keyboard. `src/tui/tray-list.ts` is
   the row painter.
@@ -25,7 +25,7 @@ Screen. agentwork ships programs, never the operator's config.
 bin/tray              the left panel app's entry: reads AGENTMUX_SOCKET and AGENTMUX_THEME
 config.example.yaml   an instance config using this setup, to copy
 src/tui/tray.ts       the left panel app: mirrors agent.list and each state change, a row press is agent.show
-src/tui/agent-state.ts  the model: fmx's five display states from agentmux's four, and what the human has seen
+src/tui/agent-state.ts  the model: smolmux's five display states from agentmux's four, and what the human has seen
 src/tui/tray-list.ts  the row painter
 src/tui/ramp.ts       the fxnk ramp, as agentmux's Screen paints it
 test/                 bun test

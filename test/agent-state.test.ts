@@ -26,7 +26,7 @@ const T1 = "2026-09-03T10:00:01.000Z";
 const T2 = "2026-09-03T10:00:02.000Z";
 
 describe("displayStateFor", () => {
-  test("is fmx's five values from agentmux's four, done being idle unseen", () => {
+  test("is smolmux's five values from agentmux's four, done being idle unseen", () => {
     expect(displayStateFor(view({ state: "blocked", stateSince: T1 }), null)).toBe("blocked");
     expect(displayStateFor(view({ state: "working", stateSince: T1 }), null)).toBe("working");
     expect(displayStateFor(view({ state: "unknown" }), null)).toBe("unknown");

@@ -35,7 +35,7 @@ export async function runTray(options: { apiSocket: string; theme: Theme }): Pro
   });
   renderer.root.add(list.root);
 
-  // fmx's empty state, and the Screen's: one dim line, centred, until the
+  // smolmux's empty state, and the Screen's: one dim line, centred, until the
   // first Agent. An empty list would read as nothing at all.
   const empty = new core.BoxRenderable(renderer, {
     id: "tray-empty",

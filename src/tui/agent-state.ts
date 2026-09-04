@@ -1,8 +1,8 @@
 import type { AgentStateChanged, AgentsChanged, AgentView } from "agentmux/protocol";
 
 /**
- * What a row shows, fmx's five values from agentmux's four states
- * (`~/code/fmx/src/agent-registry.ts`): an Agent that went idle while the
+ * What a row shows, smolmux's five values from agentmux's four states
+ * (`~/code/smolmux/src/agent-registry.ts`): an Agent that went idle while the
  * human was looking elsewhere is `done`, finished and unacknowledged, rather
  * than merely `idle`.
  */
@@ -11,7 +11,7 @@ export type DisplayState = "blocked" | "working" | "done" | "idle" | "unknown";
 /**
  * `seenSince` is the `stateSince` the Agent had when the human last had it in
  * the Viewport. An idle Agent whose state moved on since then finished
- * unwatched, which is what separates `done` from `idle`. fmx counts state
+ * unwatched, which is what separates `done` from `idle`. smolmux counts state
  * versions for this; agentmux stamps each change, so the stamp is the version.
  */
 export function displayStateFor(view: AgentView, seenSince: string | null): DisplayState {

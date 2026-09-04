@@ -11,10 +11,10 @@ import type { DisplayState, TrayRow } from "./agent-state.ts";
 import { fxnkRamp, type Ramp, type Theme } from "./ramp.ts";
 
 /**
- * fmx's Tray row painter (`~/code/fmx/src/session-list.ts`) with the tree
+ * smolmux's Tray row painter (`~/code/smolmux/src/session-list.ts`) with the tree
  * flattened: agentmux has one row per Agent and no project or branch rungs.
- * Rows, fills, selection and reuse are fmx's. The state mark is herdr's
- * default "dots" style instead of fmx's shapes: the operator's terminal font
+ * Rows, fills, selection and reuse are smolmux's. The state mark is herdr's
+ * default "dots" style instead of smolmux's shapes: the operator's terminal font
  * lacks the geometric shapes, so each shape fell back to a different font at
  * a different size, while a dot in one of three hues reads the same everywhere.
  */

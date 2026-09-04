@@ -55,5 +55,5 @@ README says the rest of the grammar; the operator's file is theirs to keep
 ## The Tray app
 
 `bin/tray` mirrors the instance's agent list: one row per agent, the shown
-one filled, in fmx's design and fxnk monochrome. Pressing a row shows that
+one filled, in smolmux's design and fxnk monochrome. Pressing a row shows that
 agent. It never takes focus and reads no keys.

@@ -11,16 +11,16 @@ the shown Agent filled; a row press is `agent.show`. It hears
 state. Run by agentmux, never by hand. _Avoid_: tray (that is the
 column), agentwork (that is the Setup), sidebar, agent list widget.
 
-**Display state** — what a row shows, fmx's five values from agentmux's
+**Display state** — what a row shows, smolmux's five values from agentmux's
 four, marked the way herdr's default "dots" style marks them: a filled dot
 `●` for `blocked` (red), `working` (yellow) and `done` (teal), a ring `○`
 for `idle` (green), a middle dot `·` for `unknown` (the ramp's dim step). The hues are the terminal's ANSI slots.
-The dot is the one place the left panel spends hue on state: fmx's shapes fall
+The dot is the one place the left panel spends hue on state: smolmux's shapes fall
 back to mismatched fonts on the operator's terminal. _Avoid_: status, icon
 state, agent status.
 
 **Seen** — whether the human has had an Agent in the agents panel since its
 state last changed, tracked as the `stateSince` stamp the Agent had when it
 was last shown. An idle Agent that is not seen is **done**: finished and
-unacknowledged, which is the only difference between `✓` and `○`. fmx's
-word, and fmx's rule. _Avoid_: read, acknowledged, unread.
+unacknowledged, which is the only difference between `✓` and `○`. smolmux's
+word, and smolmux's rule. _Avoid_: read, acknowledged, unread.
