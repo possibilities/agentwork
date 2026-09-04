@@ -34,7 +34,6 @@ describe("displayStateFor", () => {
     expect(displayStateFor(view({ state: "idle", stateSince: T1 }), T1)).toBe("idle");
     expect(displayStateFor(view({ state: "idle", stateSince: T2 }), T1)).toBe("done");
   });
-
 });
 
 describe("TrayModel", () => {
