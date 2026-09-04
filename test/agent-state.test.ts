@@ -9,12 +9,11 @@ function view(overrides: Partial<AgentView> = {}): AgentView {
     model: "opus-1m",
     effort: "medium",
     codex: null,
-    status: "running",
-    exitCode: null,
     state: "unknown",
     stateSince: "2026-09-03T10:00:00.000Z",
     stateRule: null,
     cwd: "/work",
+    worktree: null,
     command: ["claude"],
     paneId: "%1",
     pid: 1,
@@ -36,9 +35,6 @@ describe("displayStateFor", () => {
     expect(displayStateFor(view({ state: "idle", stateSince: T2 }), T1)).toBe("done");
   });
 
-  test("an exited agent is unknown, as a stopped fx is", () => {
-    expect(displayStateFor(view({ status: "exited", state: "working" }), null)).toBe("unknown");
-  });
 });
 
 describe("TrayModel", () => {

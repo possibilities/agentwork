@@ -4,7 +4,7 @@ import type { AgentStateChanged, AgentsChanged, AgentView } from "agentmux/proto
  * What a row shows, fmx's five values from agentmux's four states
  * (`~/code/fmx/src/agent-registry.ts`): an Agent that went idle while the
  * human was looking elsewhere is `done`, finished and unacknowledged, rather
- * than merely `idle`. An exited Agent is `unknown`, as a stopped fx is.
+ * than merely `idle`.
  */
 export type DisplayState = "blocked" | "working" | "done" | "idle" | "unknown";
 
@@ -15,7 +15,6 @@ export type DisplayState = "blocked" | "working" | "done" | "idle" | "unknown";
  * versions for this; agentmux stamps each change, so the stamp is the version.
  */
 export function displayStateFor(view: AgentView, seenSince: string | null): DisplayState {
-  if (view.status === "exited") return "unknown";
   switch (view.state) {
     case "blocked":
       return "blocked";

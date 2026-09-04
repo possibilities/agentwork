@@ -14,8 +14,7 @@ column), agentwork (that is the Setup), sidebar, agent list widget.
 **Display state** — what a row shows, fmx's five values from agentmux's
 four, marked the way herdr's default "dots" style marks them: a filled dot
 `●` for `blocked` (red), `working` (yellow) and `done` (teal), a ring `○`
-for `idle` (green), a middle dot `·` for `unknown` (the ramp's dim step);
-an exited Agent reads `unknown`. The hues are the terminal's ANSI slots.
+for `idle` (green), a middle dot `·` for `unknown` (the ramp's dim step). The hues are the terminal's ANSI slots.
 The dot is the one place the left panel spends hue on state: fmx's shapes fall
 back to mismatched fonts on the operator's terminal. _Avoid_: status, icon
 state, agent status.

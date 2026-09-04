@@ -13,14 +13,11 @@ panels:
     visible: true
     width: 26
   drawer:
-    command: agentmux screen --text drawer
     visible: false
     height: 8
   dock:
-    command: agentmux screen --text dock
     visible: false
     width: 40
   right:
-    command: agentmux screen --text right
     visible: false
     width: 40
